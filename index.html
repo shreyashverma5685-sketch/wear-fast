@@ -1,10 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>WEAR FAST</title>
-  </head>
-  <body>
-    <h1>WEAR FAST</h1>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WEAR FAST</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="header">
+    <span class="logo">WEAR FAST</span>
+    <nav class="nav">
+      <button class="nav-btn active" data-page="wardrobe">Wardrobe</button>
+      <button class="nav-btn" data-page="recommend">Get Outfit</button>
+      <button class="nav-btn" data-page="history">History</button>
+    </nav>
+  </header>
+
+  <main class="main">
+
+    <section class="page active" id="page-wardrobe">
+      <div class="page-top">
+        <h1 class="page-title">My Wardrobe</h1>
+        <button class="btn-primary" id="open-modal">+ Add Item</button>
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="top">Tops</button>
+        <button class="filter-btn" data-filter="bottom">Bottoms</button>
+        <button class="filter-btn" data-filter="shoes">Shoes</button>
+        <button class="filter-btn" data-filter="jacket">Jackets</button>
+        <button class="filter-btn" data-filter="accessories">Accessories</button>
+      </div>
+      <div class="grid" id="wardrobe-grid"></div>
+      <p class="empty-msg" id="empty-msg">No items yet. Add your first piece!</p>
+    </section>
+
+    <section class="page" id="page-recommend">
+      <div class="page-top"><h1 class="page-title">Get Outfit</h1></div>
+      <p class="placeholder">Recommendation engine coming in Phase 7.</p>
+    </section>
+
+    <section class="page" id="page-history">
+      <div class="page-top"><h1 class="page-title">History</h1></div>
+      <p class="placeholder">Outfit history coming in Phase 9.</p>
+    </section>
+
+  </main>
+
+  <div class="modal-overlay hidden" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add Clothing Item</h2>
+        <button class="modal-close" id="close-modal">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="item-name" placeholder="e.g. White Oxford Shirt" />
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="item-category">
+          <option value="top">Top</option>
+          <option value="bottom">Bottom</option>
+          <option value="shoes">Shoes</option>
+          <option value="jacket">Jacket</option>
+          <option value="accessories">Accessories</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Colour</label>
+        <input type="text" id="item-color" placeholder="e.g. Navy Blue" />
+      </div>
+      <div class="form-group">
+        <label>Occasion</label>
+        <select id="item-occasion">
+          <option value="casual">Casual</option>
+          <option value="college">College</option>
+          <option value="work">Work</option>
+          <option value="party">Party</option>
+          <option value="formal">Formal</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Photo</label>
+        <input type="file" id="item-photo" accept="image/*" />
+        <div class="preview-box">
+          <img id="photo-preview" src="" alt="" class="hidden" />
+          <span id="preview-placeholder">No photo selected</span>
+        </div>
+      </div>
+      <button class="btn-primary full-width" id="save-item">Save Item</button>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
 </html>
