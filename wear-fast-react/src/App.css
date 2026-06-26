@@ -4,3 +4,157 @@
   padding: 2rem;
   text-align: center;
 }
+
+.tagline {
+  color: #888;
+  margin-bottom: 1.5rem;
+}
+
+/* Add button */
+.wardrobe-grid__add-btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+}
+
+.wardrobe-grid__add-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Form */
+.wardrobe-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 400px;
+  margin: 0 auto 2rem;
+  padding: 1.5rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #1a1a1a;
+  text-align: left;
+}
+
+.wardrobe-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  color: #aaa;
+  gap: 0.3rem;
+}
+
+.wardrobe-form input,
+.wardrobe-form select {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: white;
+  font-size: 0.95rem;
+}
+
+.wardrobe-form__preview {
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 6px;
+  align-self: center;
+}
+
+.wardrobe-form button[type="submit"] {
+  padding: 0.6rem;
+  border: none;
+  border-radius: 6px;
+  background: #16a34a;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.wardrobe-form button[type="submit"]:hover {
+  background: #15803d;
+}
+
+/* Grid */
+.wardrobe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card */
+.wardrobe-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+
+.wardrobe-card__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.wardrobe-card__body {
+  padding: 0.75rem 1rem;
+  flex: 1;
+}
+
+.wardrobe-card__name {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.wardrobe-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  background: #2a2a2a;
+  color: #ccc;
+  text-transform: capitalize;
+}
+
+.wardrobe-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.75rem;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: #2a2a2a;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: #383838;
+}
+
+.icon-btn--danger:hover {
+  background: #7f1d1d;
+  color: #fca5a5;
+}

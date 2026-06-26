@@ -1,12 +1,15 @@
-import './App.css'
+import WardrobeGrid from './components/WardrobeGrid';
+import './App.css';
 
 function App() {
   return (
-    <div className="app">
+    <div className="App">
       <h1>WEAR FAST</h1>
-      <p>Wardrobe management, rebuilt in React 🚀</p>
+      <p className="tagline">Your wardrobe, organized.</p>
+
+      <WardrobeGrid />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
