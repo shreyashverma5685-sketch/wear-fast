@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import WardrobeCard from './WardrobeCard';
 import WardrobeForm from './WardrobeForm';
+import FilterBar from './FilterBar';
 
 const STORAGE_KEY = 'wf_items';
 
@@ -30,6 +31,7 @@ function WardrobeGrid() {
   const [items, setItems] = useState(() => loadItems());
   const [editingItem, setEditingItem] = useState(null); // null = add mode
   const [showForm, setShowForm] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState('all');
 
   useEffect(() => {
     if (items.length > 0) saveItems(items);
@@ -62,6 +64,10 @@ function WardrobeGrid() {
     setEditingItem(null);
   }
 
+  const visibleItems = categoryFilter === 'all'
+    ? items
+    : items.filter((item) => item.category === categoryFilter);
+
   return (
     <div className="wardrobe-grid-container">
       <button onClick={handleAddClick} className="wardrobe-grid__add-btn">
@@ -76,8 +82,10 @@ function WardrobeGrid() {
         />
       )}
 
+      <FilterBar selected={categoryFilter} onSelect={setCategoryFilter} />
+
       <div className="wardrobe-grid">
-        {items.map((item) => (
+        {visibleItems.map((item) => (
           <WardrobeCard
             key={item.id}
             item={item}

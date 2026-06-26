@@ -158,3 +158,33 @@
   background: #7f1d1d;
   color: #fca5a5;
 }
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-pill {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  border: 1px solid #444;
+  background: #1a1a1a;
+  color: #ccc;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+.filter-pill:hover {
+  background: #2a2a2a;
+}
+
+.filter-pill--active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: white;
+}
