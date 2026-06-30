@@ -188,3 +188,28 @@
   border-color: #2563eb;
   color: white;
 }
+
+.navbar {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem 2rem;
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #333;
+}
+
+.navbar a {
+  color: #ccc;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.navbar a:hover {
+  color: #fff;
+}
+
+.navbar a.active {
+  color: #fff;
+  border-bottom: 2px solid #fff;
+  padding-bottom: 4px;
+}

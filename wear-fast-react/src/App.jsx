@@ -1,14 +1,20 @@
-import WardrobeGrid from './components/WardrobeGrid';
-import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./components/Home";
+import WardrobeGrid from "./components/WardrobeGrid";
+import Suggestions from "./components/Suggestions";
+import "./App.css";
 
 function App() {
   return (
-    <div className="App">
-      <h1>WEAR FAST</h1>
-      <p className="tagline">Your wardrobe, organized.</p>
-
-      <WardrobeGrid />
-    </div>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/wardrobe" element={<WardrobeGrid />} />
+        <Route path="/suggestions" element={<Suggestions />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
