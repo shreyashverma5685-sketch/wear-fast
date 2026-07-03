@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const Item = require("../models/Item");
+const protect = require("../middleware/auth");
 
-// GET all items
-router.get("/", async (req, res) => {
+// GET all items for logged in user
+router.get("/", protect, async (req, res) => {
   try {
-    const items = await Item.find();
+    const items = await Item.find({ userId: req.userId });
     res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -13,9 +14,9 @@ router.get("/", async (req, res) => {
 });
 
 // POST a new item
-router.post("/", async (req, res) => {
+router.post("/", protect, async (req, res) => {
   try {
-    const item = await Item.create(req.body);
+    const item = await Item.create({ ...req.body, userId: req.userId });
     res.status(201).json(item);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -23,9 +24,9 @@ router.post("/", async (req, res) => {
 });
 
 // PUT update an item
-router.put("/:id", async (req, res) => {
+router.put("/:id", protect, async (req, res) => {
   try {
-const item = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const item = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(item);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -33,7 +34,7 @@ const item = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true }
 });
 
 // DELETE an item
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", protect, async (req, res) => {
   try {
     await Item.findByIdAndDelete(req.params.id);
     res.json({ message: "Item deleted" });
