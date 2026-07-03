@@ -213,3 +213,68 @@
   border-bottom: 2px solid #fff;
   padding-bottom: 4px;
 }
+
+.auth-container {
+  max-width: 400px;
+  margin: 4rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2rem;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+}
+
+.auth-container h2 {
+  text-align: center;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.auth-container input {
+  padding: 0.75rem 1rem;
+  background-color: #111;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.auth-container input:focus {
+  outline: none;
+  border-color: #fff;
+}
+
+.auth-container button {
+  padding: 0.75rem;
+  background-color: #fff;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-container button:hover {
+  background-color: #ddd;
+}
+
+.auth-error {
+  color: #ff4444;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.auth-container p {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.auth-container p span {
+  color: #fff;
+  cursor: pointer;
+  text-decoration: underline;
+}
