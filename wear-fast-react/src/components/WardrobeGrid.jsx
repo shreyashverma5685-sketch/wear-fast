@@ -1,93 +1,106 @@
-import { useState, useEffect } from 'react';
-import WardrobeCard from './WardrobeCard';
-import WardrobeForm from './WardrobeForm';
-import FilterBar from './FilterBar';
-
-const STORAGE_KEY = 'wf_items';
-
-function loadItems() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
-
-  const parsed = JSON.parse(raw);
-
-  // map Phase 2's "photo" field to "image" for consistency
-  return parsed.map((item) => ({
-    ...item,
-    image: item.photo,
-  }));
-}
-
-function saveItems(items) {
-  // map back to "photo" so Phase 2's prototype still reads it correctly
-  const toSave = items.map(({ image, ...rest }) => ({
-    ...rest,
-    photo: image,
-  }));
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-}
+import { useState, useEffect } from "react";
+import WardrobeCard from "./WardrobeCard";
+import WardrobeForm from "./WardrobeForm";
+import FilterBar from "./FilterBar";
+import { useNavigate } from "react-router-dom";
 
 function WardrobeGrid() {
-  const [items, setItems] = useState(() => loadItems());
-  const [editingItem, setEditingItem] = useState(null); // null = add mode
+  const [items, setItems] = useState([]);
+  const [editingItem, setEditingItem] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem("wf_token");
 
   useEffect(() => {
-    if (items.length > 0) saveItems(items);
-  }, [items]);
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+   fetch("http://localhost:5000/items", {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+    .then((res) => res.json())
+    .then((data) => setItems(data))
+    .catch(() => console.log("Failed to fetch items"));
+    }, [token, navigate] );
 
-  function handleAddClick() {
+  const handleSubmit = async (item) => {
+    try {
+      if (editingItem) {
+        const response = await fetch(`http://localhost:5000/items/${editingItem._id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(item),
+        });
+        const updated = await response.json();
+        setItems(items.map((i) => (i._id === updated._id ? updated : i)));
+      } else {
+        const response = await fetch("http://localhost:5000/items", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(item),
+        });
+        const created = await response.json();
+        setItems([...items, created]);
+      }
+    } catch {
+      console.log("Failed to save item");
+    }
     setEditingItem(null);
-    setShowForm(true);
-  }
+    setShowForm(false);
+  };
 
-  function handleEdit(id) {
-    const item = items.find((i) => i.id === id);
+  const handleDelete = async (id) => {
+    try {
+      await fetch(`http://localhost:5000/items/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setItems(items.filter((i) => i._id !== id));
+    } catch {
+      console.log("Failed to delete item");
+    }
+  };
+
+  const handleEdit = (id) => {
+    const item = items.find((i) => i._id === id);
     setEditingItem(item);
     setShowForm(true);
-  }
+  };
 
-  function handleDelete(id) {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-  }
-
-  function handleFormSubmit(item) {
-    setItems((prev) => {
-      const exists = prev.some((i) => i.id === item.id);
-      if (exists) {
-        return prev.map((i) => (i.id === item.id ? item : i));
-      }
-      return [...prev, item];
-    });
-    setShowForm(false);
-    setEditingItem(null);
-  }
-
-  const visibleItems = categoryFilter === 'all'
+  const filtered = categoryFilter === "all"
     ? items
-    : items.filter((item) => item.category === categoryFilter);
+    : items.filter((i) => i.category === categoryFilter);
 
   return (
-    <div className="wardrobe-grid-container">
-      <button onClick={handleAddClick} className="wardrobe-grid__add-btn">
-        + Add Item
-      </button>
-
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", padding: "1rem" }}>
+        <h2>My Wardrobe</h2>
+        <button onClick={() => { setEditingItem(null); setShowForm(true); }}>+ Add Item</button>
+      </div>
       {showForm && (
         <WardrobeForm
-          key={editingItem?.id || 'new'}
+          key={editingItem?._id || "new"}
           initialData={editingItem}
-          onSubmit={handleFormSubmit}
+          onSubmit={handleSubmit}
+          onCancel={() => { setEditingItem(null); setShowForm(false); }}
         />
       )}
 
       <FilterBar selected={categoryFilter} onSelect={setCategoryFilter} />
 
       <div className="wardrobe-grid">
-        {visibleItems.map((item) => (
+        {filtered.map((item) => (
           <WardrobeCard
-            key={item.id}
+            key={item._id}
             item={item}
             onEdit={handleEdit}
             onDelete={handleDelete}
