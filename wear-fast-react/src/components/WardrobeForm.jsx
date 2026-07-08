@@ -24,14 +24,14 @@ function WardrobeForm({ onSubmit, initialData }) {
   function handleSubmit(e) {
     e.preventDefault();
 
-    const item = {
-      id: initialData?.id || String(Date.now()),
-      name,
-      category,
-      color,
-      occasion,
-      image,
-    };
+  const item = {
+    ...(initialData?._id && { _id: initialData._id }),
+    name,
+    category,
+    color,
+    occasion,
+    image,
+  };
 
     onSubmit(item);
   }
