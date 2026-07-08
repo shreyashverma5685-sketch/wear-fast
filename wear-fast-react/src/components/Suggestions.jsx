@@ -36,10 +36,10 @@ function Suggestions() {
       }
 
       setOutfit(data.outfit);
-    } catch (err) {
-  console.error("Suggestions fetch failed:", err);
-  setError("Could not reach the server");
-} finally {
+        } catch (err) {
+      console.error("Suggestions fetch failed:", err);
+      setError("Could not reach the server");
+    } finally {
       setLoading(false);
     }
   }
