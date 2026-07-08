@@ -23,9 +23,9 @@ function WardrobeGrid() {
 
     async function fetchItems() {
       const res = await fetch(API_URL, {
-  headers: { Authorization: `Bearer ${token}` },
-  cache: 'no-store',
-});
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      });
       if (res.status === 401) {
         navigate('/login');
         return;
