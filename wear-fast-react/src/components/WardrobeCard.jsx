@@ -1,5 +1,5 @@
 function WardrobeCard({ item, onEdit, onDelete }) {
-  const { id, name, category, color, occasion, image } = item;
+  const { _id, name, category, color, occasion, fit, fabricWeight, formality, image } = item;
 
   return (
     <div className="wardrobe-card">
@@ -12,13 +12,16 @@ function WardrobeCard({ item, onEdit, onDelete }) {
           <span className="badge badge--category">{category}</span>
           <span className="badge badge--color">{color}</span>
           <span className="badge badge--occasion">{occasion}</span>
+          <span className="badge badge--fit">{fit}</span>
+          <span className="badge badge--fabric">{fabricWeight}</span>
+          <span className="badge badge--formality">{formality}</span>
         </div>
       </div>
 
       <div className="wardrobe-card__actions">
         <button
           className="icon-btn"
-          onClick={() => onEdit(id)}
+          onClick={() => onEdit(_id)}
           aria-label="Edit item"
         >
           {/* pencil icon */}
@@ -30,7 +33,7 @@ function WardrobeCard({ item, onEdit, onDelete }) {
 
         <button
           className="icon-btn icon-btn--danger"
-          onClick={() => onDelete(id)}
+          onClick={() => onDelete(_id)}
           aria-label="Delete item"
         >
           {/* trash icon */}
