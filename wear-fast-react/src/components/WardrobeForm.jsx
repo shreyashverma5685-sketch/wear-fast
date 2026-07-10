@@ -3,6 +3,7 @@ import { useState } from 'react';
 const CATEGORIES = ['top', 'bottom', 'dress', 'shoes', 'accessory'];
 const OCCASIONS = ['casual', 'formal', 'party', 'work', 'sport'];
 const COLORS = ['black', 'white', 'grey', 'navy', 'beige', 'brown', 'red', 'blue', 'green', 'yellow', 'pink', 'orange', 'purple'];
+const PATTERNS = ['solid', 'striped', 'checked', 'printed'];
 const FITS = ['slim', 'regular', 'loose', 'oversized'];
 const FABRIC_WEIGHTS = ['light', 'medium', 'heavy'];
 const FORMALITIES = ['casual', 'smart-casual', 'formal'];
@@ -11,6 +12,7 @@ function WardrobeForm({ onSubmit, initialData }) {
   const [name, setName] = useState(initialData?.name || '');
   const [category, setCategory] = useState(initialData?.category || CATEGORIES[0]);
   const [color, setColor] = useState(initialData?.color || COLORS[0]);
+  const [pattern, setPattern] = useState(initialData?.pattern || PATTERNS[0]);
   const [occasion, setOccasion] = useState(initialData?.occasion || OCCASIONS[0]);
   const [fit, setFit] = useState(initialData?.fit || FITS[1]);
   const [fabricWeight, setFabricWeight] = useState(initialData?.fabricWeight || FABRIC_WEIGHTS[1]);
@@ -36,6 +38,7 @@ function WardrobeForm({ onSubmit, initialData }) {
     name,
     category,
     color,
+    pattern,
     occasion,
     fit,
     fabricWeight,
@@ -72,6 +75,15 @@ function WardrobeForm({ onSubmit, initialData }) {
         <select value={color} onChange={(e) => setColor(e.target.value)}>
           {COLORS.map((c) => (
             <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Pattern
+        <select value={pattern} onChange={(e) => setPattern(e.target.value)}>
+          {PATTERNS.map((p) => (
+            <option key={p} value={p}>{p}</option>
           ))}
         </select>
       </label>

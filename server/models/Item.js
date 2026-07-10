@@ -10,6 +10,12 @@ const itemSchema = new mongoose.Schema({
     enum: ["black", "white", "grey", "navy", "beige", "brown", "red", "blue", "green", "yellow", "pink", "orange", "purple"],
     default: "black",
   },
+  pattern: {
+    type: String,
+    required: true,
+    enum: ["solid", "striped", "checked", "printed"],
+    default: "solid",
+  },
   fit: {
     type: String,
     required: true,

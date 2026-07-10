@@ -146,6 +146,11 @@
   color: #7fe0c2;
 }
 
+.badge--pattern {
+  background: rgba(236, 72, 153, 0.15);
+  color: #f9a8d4;
+}
+
 .wardrobe-card__actions {
   display: flex;
   gap: 0.5rem;
