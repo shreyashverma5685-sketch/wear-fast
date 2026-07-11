@@ -5,7 +5,8 @@ function Suggestions() {
   const [weather, setWeather] = useState("hot");
   const [timeOfDay, setTimeOfDay] = useState("day");
 
-  const [outfit, setOutfit] = useState(null);
+  const [suggestions, setSuggestions] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -15,7 +16,8 @@ function Suggestions() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setOutfit(null);
+    setSuggestions(null);
+    setMessages([]);
 
     try {
       const res = await fetch("http://localhost:5000/suggestions", {
@@ -35,8 +37,9 @@ function Suggestions() {
         return;
       }
 
-      setOutfit(data.outfit);
-        } catch (err) {
+      setSuggestions(data.suggestions);
+      setMessages(data.messages || []);
+    } catch (err) {
       console.error("Suggestions fetch failed:", err);
       setError("Could not reach the server");
     } finally {
@@ -83,18 +86,33 @@ function Suggestions() {
 
       {error && <p className="suggestions-error">{error}</p>}
 
-      {outfit && (
-        <div className="outfit-result">
-          <h3>Your Outfit</h3>
-          <div className="outfit-result__grid">
-            {Object.entries(outfit).map(([slot, item]) => (
-              <div key={item._id} className="outfit-result__item">
-                <p className="outfit-result__slot">{slot}</p>
-                <p>{item.name}</p>
-                <p>{item.color}</p>
+      {messages.length > 0 && (
+        <div className="suggestions-messages">
+          {messages.map((msg, i) => (
+            <p key={i} className="suggestions-message">{msg}</p>
+          ))}
+        </div>
+      )}
+
+      {suggestions && suggestions.length > 0 && (
+        <div className="outfit-results">
+          {suggestions.map(({ outfit, score }, i) => (
+            <div key={i} className="outfit-result">
+              <h3>Option {i + 1} <span className="outfit-result__score">score: {score}</span></h3>
+              <div className="outfit-result__grid">
+                {Object.entries(outfit).map(([slot, item]) => (
+                  <div key={item._id} className="outfit-result__item">
+                    {item.image && (
+                      <img src={item.image} alt={item.name} className="outfit-result__image" />
+                    )}
+                    <p className="outfit-result__slot">{slot}</p>
+                    <p>{item.name}</p>
+                    <p>{item.color} · {item.pattern}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

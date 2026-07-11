@@ -1,5 +1,5 @@
 function WardrobeCard({ item, onEdit, onDelete }) {
-  const { _id, name, category, color, occasion, fit, fabricWeight, formality, image } = item;
+  const { _id, name, category, color, pattern, occasion, fit, fabricWeight, formality, image } = item;
 
   return (
     <div className="wardrobe-card">
@@ -11,6 +11,7 @@ function WardrobeCard({ item, onEdit, onDelete }) {
         <div className="wardrobe-card__badges">
           <span className="badge badge--category">{category}</span>
           <span className="badge badge--color">{color}</span>
+          <span className="badge badge--pattern">{pattern}</span>
           <span className="badge badge--occasion">{occasion}</span>
           <span className="badge badge--fit">{fit}</span>
           <span className="badge badge--fabric">{fabricWeight}</span>
