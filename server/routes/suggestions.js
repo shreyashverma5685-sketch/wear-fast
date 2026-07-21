@@ -31,50 +31,88 @@ function scoreColors(colors) {
   const distinctAccents = new Set(colors.filter((c) => !NEUTRALS.has(c)));
   const hasNeutral = colors.some((c) => NEUTRALS.has(c));
 
-  if (distinctAccents.size === 0) return 7; // all neutral — safe, a bit plain
-  if (distinctAccents.size === 1) return hasNeutral ? 10 : 6; // neutral+accent ideal, or monochrome accent
+  if (distinctAccents.size === 0) {
+    return { score: 7, reason: null }; // all neutral — safe, a bit plain
+  }
+  if (distinctAccents.size === 1) {
+    if (hasNeutral) {
+      return { score: 10, reason: "Balanced neutral tones with a single accent color" };
+    }
+    return { score: 6, reason: null }; // monochrome accent — fine, unremarkable
+  }
 
   const accentArr = [...distinctAccents];
   const allPairsGood = accentArr.every((c1, i) =>
     accentArr.slice(i + 1).every((c2) => isGoodPair(c1, c2))
   );
-  return allPairsGood ? 7 : 2;
+  if (allPairsGood) {
+    return { score: 7, reason: null };
+  }
+  return { score: 2, reason: "Multiple accent colors that don't pair well together" };
 }
 
 function scorePatterns(items) {
   const patterned = items.filter((i) => i.pattern !== "solid");
-  if (patterned.length === 0) return 0; // all solid, color rules alone govern
-  if (patterned.length === 1) return 1; // classic solid+patterned pairing
+  if (patterned.length === 0) {
+    return { score: 0, reason: null }; // all solid, color rules alone govern
+  }
+  if (patterned.length === 1) {
+    return { score: 1, reason: "Solid pieces paired with one patterned item — a classic combo" };
+  }
 
   const allNeutralPatterned = patterned.every((i) => NEUTRALS.has(i.color));
-  return allNeutralPatterned ? -1 : -5;
+  if (allNeutralPatterned) {
+    return { score: -1, reason: null }; // minor, not worth flagging
+  }
+  return { score: -5, reason: "Multiple bold patterns competing with each other" };
 }
 
 function scoreFormality(formalities) {
   const indices = formalities.map((f) => FORMALITY_ORDER.indexOf(f));
   const diff = Math.max(...indices) - Math.min(...indices);
-  if (diff === 0) return 0;
-  if (diff === 1) return -6;
-  return -14;
+  if (diff === 0) {
+    return { score: 0, reason: null };
+  }
+  if (diff === 1) {
+    return { score: -6, reason: "Slight formality mismatch between pieces" };
+  }
+  return { score: -14, reason: "Casual and formal pieces mixed together" };
 }
 
 function scoreWeather(items, weather) {
   const fitTable = WEATHER_FABRIC_FIT[weather];
-  if (!fitTable) return 0; // unrecognized/missing weather value — no penalty, don't guess
+  if (!fitTable) {
+    return { score: 0, reason: null }; // unrecognized/missing weather value — don't guess
+  }
 
-  return items.reduce((total, item) => {
+  let total = 0;
+  let worstPenalty = 0;
+  for (const item of items) {
     const penalty = fitTable[item.fabricWeight];
-    return total + (typeof penalty === "number" ? penalty : 0);
-  }, 0);
+    if (typeof penalty === "number") {
+      total += penalty;
+      if (penalty < worstPenalty) worstPenalty = penalty;
+    }
+  }
+
+  const reason = worstPenalty <= -8 ? `Fabric weight not ideal for ${weather} weather` : null;
+  return { score: total, reason };
 }
 
 function scoreCombo(combo, weather) {
   const items = Object.values(combo);
-  const colorScore = scoreColors(items.map((i) => i.color));
-  const patternScore = scorePatterns(items);
-  const formalityScore = scoreFormality(items.map((i) => i.formality));
-  const weatherScore = scoreWeather(items, weather);
-  return colorScore + patternScore + formalityScore + weatherScore;
+
+  const color = scoreColors(items.map((i) => i.color));
+  const pattern = scorePatterns(items);
+  const formality = scoreFormality(items.map((i) => i.formality));
+  const weatherResult = scoreWeather(items, weather);
+
+  const totalScore = color.score + pattern.score + formality.score + weatherResult.score;
+  const explanation = [color.reason, pattern.reason, formality.reason, weatherResult.reason].filter(
+    (r) => r !== null
+  );
+
+  return { score: totalScore, explanation };
 }
 
 function cartesian(arraysWithLabels) {
@@ -155,7 +193,10 @@ router.post("/", protect, async (req, res) => {
     }
 
     const scored = combos
-      .map((combo) => ({ outfit: combo, score: scoreCombo(combo, weather) }))
+      .map((combo) => {
+        const { score, explanation } = scoreCombo(combo, weather);
+        return { outfit: combo, score, explanation };
+      })
       .sort((a, b) => b.score - a.score)
       .slice(0, 3);
 
