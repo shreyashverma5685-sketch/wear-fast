@@ -14,6 +14,15 @@ const GOOD_ACCENT_PAIRS = [
   ["pink", "purple"],
 ];
 
+// NOTE: these weather values are assumed — verify against your actual
+// form field before relying on this. A mismatch here fails silently.
+const WEATHER_FABRIC_FIT = {
+  hot: { light: 0, medium: -4, heavy: -12 },
+  cold: { light: -12, medium: -4, heavy: 0 },
+  mild: { light: -2, medium: 0, heavy: -2 },
+  rainy: { light: 0, medium: 0, heavy: 0 }, // no rain-specific item data yet — no penalty applied
+};
+
 function isGoodPair(a, b) {
   return GOOD_ACCENT_PAIRS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
 }
@@ -49,12 +58,23 @@ function scoreFormality(formalities) {
   return -14;
 }
 
-function scoreCombo(combo) {
+function scoreWeather(items, weather) {
+  const fitTable = WEATHER_FABRIC_FIT[weather];
+  if (!fitTable) return 0; // unrecognized/missing weather value — no penalty, don't guess
+
+  return items.reduce((total, item) => {
+    const penalty = fitTable[item.fabricWeight];
+    return total + (typeof penalty === "number" ? penalty : 0);
+  }, 0);
+}
+
+function scoreCombo(combo, weather) {
   const items = Object.values(combo);
   const colorScore = scoreColors(items.map((i) => i.color));
   const patternScore = scorePatterns(items);
   const formalityScore = scoreFormality(items.map((i) => i.formality));
-  return colorScore + patternScore + formalityScore;
+  const weatherScore = scoreWeather(items, weather);
+  return colorScore + patternScore + formalityScore + weatherScore;
 }
 
 function cartesian(arraysWithLabels) {
@@ -135,7 +155,7 @@ router.post("/", protect, async (req, res) => {
     }
 
     const scored = combos
-      .map((combo) => ({ outfit: combo, score: scoreCombo(combo) }))
+      .map((combo) => ({ outfit: combo, score: scoreCombo(combo, weather) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 3);
 
