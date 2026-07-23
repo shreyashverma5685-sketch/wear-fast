@@ -11,8 +11,36 @@ function Suggestions() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [wornMap, setWornMap] = useState({});
 
   const token = localStorage.getItem("wf_token");
+
+  async function handleMarkWorn(outfit, category, outfitKey) {
+    if (wornMap[outfitKey]) return;
+
+    const itemIds = Object.values(outfit).map((item) => item._id);
+
+    try {
+      const res = await fetch("http://localhost:5000/history", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ itemIds, category: category || "Suggestion" }),
+      });
+
+      if (res.ok) {
+        setWornMap((prev) => ({ ...prev, [outfitKey]: true }));
+      } else {
+        const data = await res.json();
+        alert(data.message || "Failed to log outfit history");
+      }
+    } catch (err) {
+      console.error("Mark worn failed:", err);
+      alert("Could not reach server to save outfit history");
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -53,12 +81,28 @@ function Suggestions() {
   }
 
   function renderOutfitCard({ outfit, score, explanation }, key, category) {
+    const itemIdsKey = Object.values(outfit)
+      .map((i) => i._id)
+      .sort()
+      .join("-");
+    const isWorn = wornMap[itemIdsKey];
+
     return (
       <div key={key} className="outfit-result">
-        <h3>
-          {category ? category : "More like this"}{" "}
-          <span className="outfit-result__score">score: {score}</span>
-        </h3>
+        <div className="outfit-result__header">
+          <h3>
+            {category ? category : "More like this"}{" "}
+            <span className="outfit-result__score">score: {score}</span>
+          </h3>
+          <button
+            type="button"
+            className={`outfit-result__worn-btn ${isWorn ? "worn" : ""}`}
+            disabled={isWorn}
+            onClick={() => handleMarkWorn(outfit, category, itemIdsKey)}
+          >
+            {isWorn ? "Worn Today ✓" : "I Wore This Today"}
+          </button>
+        </div>
         {explanation && explanation.length > 0 && (
           <ul className="outfit-result__explanation">
             {explanation.map((line, i) => (

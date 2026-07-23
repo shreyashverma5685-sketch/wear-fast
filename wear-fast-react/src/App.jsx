@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import WardrobeGrid from "./components/WardrobeGrid";
 import Suggestions from "./components/Suggestions";
+import OutfitHistory from "./components/OutfitHistory";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 import "./App.css";
@@ -15,6 +16,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/wardrobe" element={<WardrobeGrid />} />
         <Route path="/suggestions" element={<Suggestions />} />
+        <Route path="/history" element={<OutfitHistory />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Routes>

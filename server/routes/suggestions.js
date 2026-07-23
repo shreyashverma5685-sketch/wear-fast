@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Item = require("../models/Item");
+const OutfitHistory = require("../models/OutfitHistory");
 const protect = require("../middleware/auth");
 
 const NEUTRALS = new Set(["black", "white", "grey", "navy", "beige", "brown"]);
@@ -102,18 +103,45 @@ function scoreWeather(items, weather) {
   return { score: total, reason };
 }
 
-function scoreCombo(combo, weather) {
+function scoreHistoryPenalty(items, recentWornItemIds) {
+  if (!recentWornItemIds || recentWornItemIds.size === 0) {
+    return { score: 0, reason: null };
+  }
+
+  const hasRecentItem = items.some((item) => recentWornItemIds.has(item._id.toString()));
+  if (hasRecentItem) {
+    return {
+      score: -8,
+      reason: "Contains items worn in the last 7 days — rating adjusted for variety",
+    };
+  }
+
+  return { score: 0, reason: null };
+}
+
+function scoreCombo(combo, weather, recentWornItemIds) {
   const items = Object.values(combo);
 
   const color = scoreColors(items.map((i) => i.color));
   const pattern = scorePatterns(items);
   const formality = scoreFormality(items.map((i) => i.formality));
   const weatherResult = scoreWeather(items, weather);
+  const historyResult = scoreHistoryPenalty(items, recentWornItemIds);
 
-  const totalScore = color.score + pattern.score + formality.score + weatherResult.score;
-  const explanation = [color.reason, pattern.reason, formality.reason, weatherResult.reason].filter(
-    (r) => r !== null
-  );
+  const totalScore =
+    color.score +
+    pattern.score +
+    formality.score +
+    weatherResult.score +
+    historyResult.score;
+
+  const explanation = [
+    color.reason,
+    pattern.reason,
+    formality.reason,
+    weatherResult.reason,
+    historyResult.reason,
+  ].filter((r) => r !== null);
 
   return { score: totalScore, explanation };
 }
@@ -260,9 +288,22 @@ router.post("/", protect, async (req, res) => {
       return res.status(404).json({ message: "No matching items found for this occasion" });
     }
 
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recentHistory = await OutfitHistory.find({
+      userId: req.userId,
+      wornAt: { $gte: sevenDaysAgo },
+    });
+
+    const recentWornItemIds = new Set();
+    recentHistory.forEach((record) => {
+      record.itemIds.forEach((itemId) => {
+        if (itemId) recentWornItemIds.add(itemId.toString());
+      });
+    });
+
     const scoredAll = combos
       .map((combo) => {
-        const { score, explanation } = scoreCombo(combo, weather);
+        const { score, explanation } = scoreCombo(combo, weather, recentWornItemIds);
         return { key: comboKey(combo), outfit: combo, score, explanation };
       })
       .sort((a, b) => b.score - a.score);
