@@ -6,6 +6,7 @@ require("dotenv").config();
 const itemRoutes = require("./routes/items");
 const authRoutes = require("./routes/auth");
 const suggestionsRouter = require("./routes/suggestions");
+const historyRoutes = require("./routes/history");
 
 const app = express();
 const PORT = 5000;
@@ -20,6 +21,7 @@ mongoose.connect(process.env.MONGO_URI)
 app.use("/items", itemRoutes);
 app.use("/auth", authRoutes);
 app.use("/suggestions", suggestionsRouter);
+app.use("/history", historyRoutes);
 
 app.get("/", (req, res) => {
   res.send("WEAR FAST server is running");
