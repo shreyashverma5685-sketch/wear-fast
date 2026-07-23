@@ -359,3 +359,72 @@
   cursor: pointer;
   text-decoration: underline;
 }
+
+/* Outfit Result Header & Worn Button */
+.outfit-result__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.outfit-result__worn-btn {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.outfit-result__worn-btn:hover {
+  background: #1d4ed8;
+}
+
+.outfit-result__worn-btn.worn {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: #4ade80;
+  cursor: default;
+}
+
+/* History Page */
+.history-header {
+  margin-bottom: 2rem;
+}
+
+.history-card {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.history-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #2a2a2a;
+  padding-bottom: 0.75rem;
+}
+
+.history-card__date {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.history-card__category {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  background: rgba(37, 99, 235, 0.15);
+  color: #60a5fa;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
