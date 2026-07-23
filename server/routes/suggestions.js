@@ -23,6 +23,9 @@ const WEATHER_FABRIC_FIT = {
   rainy: { light: 0, medium: 0, heavy: 0 }, // no rain-specific item data yet — no penalty applied
 };
 
+// Labels shown for each categorized slot, in the order they're filled.
+const CATEGORY_LABELS = ["Best Match", "Safe Neutral", "Bold Choice"];
+
 function isGoodPair(a, b) {
   return GOOD_ACCENT_PAIRS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
 }
@@ -149,6 +152,71 @@ function getMissingMessages(buckets) {
   return messages;
 }
 
+// --- 5h additions below ---
+
+// Stable identity for a combo, built from the underlying item ids —
+// used to detect when two categories would pick the same outfit.
+function comboKey(combo) {
+  return Object.keys(combo)
+    .sort()
+    .map((label) => `${label}:${combo[label]._id}`)
+    .join("|");
+}
+
+function isAllNeutral(items) {
+  return items.every((item) => NEUTRALS.has(item.color));
+}
+
+function hasAccentOrPattern(items) {
+  return items.some((item) => !NEUTRALS.has(item.color) || item.pattern !== "solid");
+}
+
+// scoredAll must already be sorted by score, descending.
+// Returns { categorized, remaining } — categorized is up to 3 labeled
+// picks (Best Match / Safe Neutral / Bold Choice), remaining is
+// everything else still sorted by score for "load more".
+function pickCategorizedSuggestions(scoredAll) {
+  const chosenKeys = new Set();
+  const chosen = [];
+
+  function takeNextMatching(predicate) {
+    return scoredAll.find((entry) => !chosenKeys.has(entry.key) && predicate(entry));
+  }
+
+  function takeNextAny() {
+    return scoredAll.find((entry) => !chosenKeys.has(entry.key));
+  }
+
+  function claim(entry) {
+    if (!entry) return;
+    chosenKeys.add(entry.key);
+    chosen.push(entry);
+  }
+
+  // Best Match — highest score, no restriction.
+  claim(takeNextAny());
+
+  // Safe Neutral — falls back to next-best overall if no all-neutral
+  // outfit exists in the wardrobe, so the slot is never just empty.
+  claim(takeNextMatching((e) => isAllNeutral(Object.values(e.outfit))) || takeNextAny());
+
+  // Bold Choice — same fallback behavior.
+  claim(takeNextMatching((e) => hasAccentOrPattern(Object.values(e.outfit))) || takeNextAny());
+
+  const categorized = chosen.map((entry, i) => ({
+    category: CATEGORY_LABELS[i],
+    outfit: entry.outfit,
+    score: entry.score,
+    explanation: entry.explanation,
+  }));
+
+  const remaining = scoredAll
+    .filter((entry) => !chosenKeys.has(entry.key))
+    .map(({ outfit, score, explanation }) => ({ outfit, score, explanation }));
+
+  return { categorized, remaining };
+}
+
 router.post("/", protect, async (req, res) => {
   try {
     const { occasion, weather, timeOfDay } = req.body;
@@ -192,19 +260,21 @@ router.post("/", protect, async (req, res) => {
       return res.status(404).json({ message: "No matching items found for this occasion" });
     }
 
-    const scored = combos
+    const scoredAll = combos
       .map((combo) => {
         const { score, explanation } = scoreCombo(combo, weather);
-        return { outfit: combo, score, explanation };
+        return { key: comboKey(combo), outfit: combo, score, explanation };
       })
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3);
+      .sort((a, b) => b.score - a.score);
+
+    const { categorized, remaining } = pickCategorizedSuggestions(scoredAll);
 
     res.json({
       occasion,
       weather,
       timeOfDay,
-      suggestions: scored,
+      suggestions: categorized,
+      moreSuggestions: remaining,
       messages: getMissingMessages(buckets),
     });
   } catch (err) {

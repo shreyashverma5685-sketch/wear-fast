@@ -6,6 +6,8 @@ function Suggestions() {
   const [timeOfDay, setTimeOfDay] = useState("day");
 
   const [suggestions, setSuggestions] = useState(null);
+  const [moreSuggestions, setMoreSuggestions] = useState([]);
+  const [showMore, setShowMore] = useState(false);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,6 +19,8 @@ function Suggestions() {
     setLoading(true);
     setError(null);
     setSuggestions(null);
+    setMoreSuggestions([]);
+    setShowMore(false);
     setMessages([]);
 
     try {
@@ -38,6 +42,7 @@ function Suggestions() {
       }
 
       setSuggestions(data.suggestions);
+      setMoreSuggestions(data.moreSuggestions || []);
       setMessages(data.messages || []);
     } catch (err) {
       console.error("Suggestions fetch failed:", err);
@@ -45,6 +50,36 @@ function Suggestions() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function renderOutfitCard({ outfit, score, explanation }, key, category) {
+    return (
+      <div key={key} className="outfit-result">
+        <h3>
+          {category ? category : "More like this"}{" "}
+          <span className="outfit-result__score">score: {score}</span>
+        </h3>
+        {explanation && explanation.length > 0 && (
+          <ul className="outfit-result__explanation">
+            {explanation.map((line, i) => (
+              <li key={i}>{line}</li>
+            ))}
+          </ul>
+        )}
+        <div className="outfit-result__grid">
+          {Object.entries(outfit).map(([slot, item]) => (
+            <div key={item._id} className="outfit-result__item">
+              {item.image && (
+                <img src={item.image} alt={item.name} className="outfit-result__image" />
+              )}
+              <p className="outfit-result__slot">{slot}</p>
+              <p>{item.name}</p>
+              <p>{item.color} · {item.pattern}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -96,23 +131,21 @@ function Suggestions() {
 
       {suggestions && suggestions.length > 0 && (
         <div className="outfit-results">
-          {suggestions.map(({ outfit, score }, i) => (
-            <div key={i} className="outfit-result">
-              <h3>Option {i + 1} <span className="outfit-result__score">score: {score}</span></h3>
-              <div className="outfit-result__grid">
-                {Object.entries(outfit).map(([slot, item]) => (
-                  <div key={item._id} className="outfit-result__item">
-                    {item.image && (
-                      <img src={item.image} alt={item.name} className="outfit-result__image" />
-                    )}
-                    <p className="outfit-result__slot">{slot}</p>
-                    <p>{item.name}</p>
-                    <p>{item.color} · {item.pattern}</p>
-                  </div>
-                ))}
-              </div>
+          {suggestions.map((entry, i) => renderOutfitCard(entry, i, entry.category))}
+        </div>
+      )}
+
+      {moreSuggestions.length > 0 && (
+        <div className="outfit-results__more">
+          <button type="button" onClick={() => setShowMore((prev) => !prev)}>
+            {showMore ? "Hide more options" : `Load more (${moreSuggestions.length})`}
+          </button>
+
+          {showMore && (
+            <div className="outfit-results">
+              {moreSuggestions.map((entry, i) => renderOutfitCard(entry, `more-${i}`, null))}
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>
