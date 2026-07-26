@@ -12,9 +12,10 @@ function App() {
   return (
     <BrowserRouter>
       <Navbar />
+      <div className="bg-denim text-white p-4">Tailwind test</div>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/wardrobe" element={<WardrobeGrid />} />
+        <Route path  = "/wardrobe" element={<WardrobeGrid />} />
         <Route path="/suggestions" element={<Suggestions />} />
         <Route path="/history" element={<OutfitHistory />} />
         <Route path="/login" element={<Login />} />
