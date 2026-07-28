@@ -9,7 +9,11 @@ const FABRIC_WEIGHTS = ['light', 'medium', 'heavy'];
 const FORMALITIES = ['casual', 'smart-casual', 'formal'];
 
 const MAX_IMAGE_WIDTH = 800;
-const IMAGE_QUALITY = 0.8; // JPEG quality, 0-1
+const IMAGE_QUALITY = 0.8;
+
+const CLOUDINARY_CLOUD_NAME = 'zrd5xwvi';
+const CLOUDINARY_UPLOAD_PRESET = 'wearfast_wardrobe';
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
 function WardrobeForm({ onSubmit, onClose, initialData }) {
   const [name, setName] = useState(initialData?.name || '');
@@ -22,10 +26,10 @@ function WardrobeForm({ onSubmit, onClose, initialData }) {
   const [formality, setFormality] = useState(initialData?.formality || FORMALITIES[0]);
   const [image, setImage] = useState(initialData?.image || '');
   const [compressing, setCompressing] = useState(false);
+  const [uploadError, setUploadError] = useState('');
 
-  // Reads the picked file, draws it onto a canvas scaled down to
-  // MAX_IMAGE_WIDTH, and resolves with a compressed base64 JPEG —
-  // keeps large phone photos from bloating MongoDB storage.
+  // Resizes the picked file down to MAX_IMAGE_WIDTH on a canvas and
+  // resolves with a compressed Blob (not base64) — ready to upload.
   function compressImage(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -43,7 +47,11 @@ function WardrobeForm({ onSubmit, onClose, initialData }) {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
-          resolve(canvas.toDataURL('image/jpeg', IMAGE_QUALITY));
+          canvas.toBlob(
+            (blob) => (blob ? resolve(blob) : reject(new Error('Canvas export failed'))),
+            'image/jpeg',
+            IMAGE_QUALITY
+          );
         };
         img.onerror = reject;
         img.src = reader.result;
@@ -53,17 +61,39 @@ function WardrobeForm({ onSubmit, onClose, initialData }) {
     });
   }
 
+  // Uploads a compressed image blob directly to Cloudinary using the
+  // unsigned preset, and returns the hosted image URL.
+  async function uploadToCloudinary(blob) {
+    const formData = new FormData();
+    formData.append('file', blob);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    const res = await fetch(CLOUDINARY_UPLOAD_URL, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error('Cloudinary upload failed');
+    }
+
+    const data = await res.json();
+    return data.secure_url;
+  }
+
   async function handleImageChange(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     setCompressing(true);
+    setUploadError('');
     try {
-      const compressed = await compressImage(file);
-      setImage(compressed);
+      const compressedBlob = await compressImage(file);
+      const url = await uploadToCloudinary(compressedBlob);
+      setImage(url);
     } catch (err) {
-      console.error('Image compression failed:', err);
-      alert('Could not process that image — please try a different file.');
+      console.error('Image upload failed:', err);
+      setUploadError('Could not upload that image — please try again.');
     } finally {
       setCompressing(false);
     }
@@ -197,7 +227,10 @@ function WardrobeForm({ onSubmit, onClose, initialData }) {
             className="font-display text-sm text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-tag file:border-0 file:bg-denim file:text-linen-card file:text-xs file:uppercase file:tracking-wide file:cursor-pointer"
           />
           {compressing && (
-            <span className="font-mono-tag text-[10px] text-muted uppercase">Processing image...</span>
+            <span className="font-mono-tag text-[10px] text-muted uppercase">Uploading image...</span>
+          )}
+          {uploadError && (
+            <span className="font-mono-tag text-[10px] text-brick uppercase">{uploadError}</span>
           )}
         </label>
 

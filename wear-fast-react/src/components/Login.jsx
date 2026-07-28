@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 function Login() {
@@ -8,6 +8,14 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Already logged in? Bounce straight to the wardrobe instead of
+  // showing the login form again.
+  useEffect(() => {
+    if (localStorage.getItem("wf_token")) {
+      navigate("/wardrobe");
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
