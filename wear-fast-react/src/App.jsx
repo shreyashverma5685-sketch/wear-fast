@@ -12,15 +12,16 @@ function App() {
   return (
     <BrowserRouter>
       <Navbar />
-      <div className="bg-denim text-white p-4">Tailwind test</div>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path  = "/wardrobe" element={<WardrobeGrid />} />
-        <Route path="/suggestions" element={<Suggestions />} />
-        <Route path="/history" element={<OutfitHistory />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-      </Routes>
+      <main className="flex-1 w-full py-6">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/wardrobe" element={<WardrobeGrid />} />
+          <Route path="/suggestions" element={<Suggestions />} />
+          <Route path="/history" element={<OutfitHistory />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Routes>
+      </main>
     </BrowserRouter>
   );
 }

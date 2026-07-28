@@ -27,113 +27,126 @@ const WEATHER_FABRIC_FIT = {
 // Labels shown for each categorized slot, in the order they're filled.
 const CATEGORY_LABELS = ["Best Match", "Safe Neutral", "Bold Choice"];
 
+// True maximum achievable raw score across all sub-scores, used to
+// normalize into a clean 0-100% range instead of clamping (clamping
+// silently flattens every strong outfit to the same 100%).
+// color(35) + pattern(20) + formality(25) + weather(20) + history(5) = 105
+const MAX_RAW_SCORE = 105;
+
 function isGoodPair(a, b) {
   return GOOD_ACCENT_PAIRS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
 }
 
 function scoreColors(colors) {
-  const distinctAccents = new Set(colors.filter((c) => !NEUTRALS.has(c)));
-  const hasNeutral = colors.some((c) => NEUTRALS.has(c));
+  const distinctAccents = new Set(colors.filter((c) => !NEUTRALS.has(c.toLowerCase())));
+  const hasNeutral = colors.some((c) => NEUTRALS.has(c.toLowerCase()));
 
   if (distinctAccents.size === 0) {
-    return { score: 7, reason: null }; // all neutral — safe, a bit plain
+    return { score: 30, reason: "Classic, versatile neutral color palette" };
   }
   if (distinctAccents.size === 1) {
     if (hasNeutral) {
-      return { score: 10, reason: "Balanced neutral tones with a single accent color" };
+      return { score: 35, reason: "Balanced neutral base with a single pop accent color" };
     }
-    return { score: 6, reason: null }; // monochrome accent — fine, unremarkable
+    return { score: 28, reason: "Monochromatic accent palette" };
   }
 
   const accentArr = [...distinctAccents];
   const allPairsGood = accentArr.every((c1, i) =>
-    accentArr.slice(i + 1).every((c2) => isGoodPair(c1, c2))
+    accentArr.slice(i + 1).every((c2) => isGoodPair(c1.toLowerCase(), c2.toLowerCase()))
   );
   if (allPairsGood) {
-    return { score: 7, reason: null };
+    return { score: 30, reason: "Harmonious accent colors pairing well together" };
   }
-  return { score: 2, reason: "Multiple accent colors that don't pair well together" };
+  return { score: 15, reason: "Multiple accent colors that may compete for attention" };
 }
 
 function scorePatterns(items) {
-  const patterned = items.filter((i) => i.pattern !== "solid");
+  const patterned = items.filter((i) => i.pattern && i.pattern.toLowerCase() !== "solid");
   if (patterned.length === 0) {
-    return { score: 0, reason: null }; // all solid, color rules alone govern
+    return { score: 20, reason: null }; // all solid - clean & cohesive
   }
   if (patterned.length === 1) {
-    return { score: 1, reason: "Solid pieces paired with one patterned item — a classic combo" };
+    return { score: 20, reason: "Solid pieces paired with one statement patterned item" };
   }
 
-  const allNeutralPatterned = patterned.every((i) => NEUTRALS.has(i.color));
+  const allNeutralPatterned = patterned.every((i) => NEUTRALS.has(i.color.toLowerCase()));
   if (allNeutralPatterned) {
-    return { score: -1, reason: null }; // minor, not worth flagging
+    return { score: 15, reason: "Subtle pattern mix in neutral tones" };
   }
-  return { score: -5, reason: "Multiple bold patterns competing with each other" };
+  return { score: 8, reason: "Multiple bold patterns competing with each other" };
 }
 
 function scoreFormality(formalities) {
-  const indices = formalities.map((f) => FORMALITY_ORDER.indexOf(f));
-  const diff = Math.max(...indices) - Math.min(...indices);
+  const indices = formalities.map((f) => FORMALITY_ORDER.indexOf(f.toLowerCase()));
+  const validIndices = indices.filter(idx => idx !== -1);
+  if (validIndices.length === 0) return { score: 20, reason: null };
+
+  const diff = Math.max(...validIndices) - Math.min(...validIndices);
   if (diff === 0) {
-    return { score: 0, reason: null };
+    return { score: 25, reason: "Perfect formality matching across all pieces" };
   }
   if (diff === 1) {
-    return { score: -6, reason: "Slight formality mismatch between pieces" };
+    return { score: 18, reason: "Slight formality transition between pieces" };
   }
-  return { score: -14, reason: "Casual and formal pieces mixed together" };
+  return { score: 8, reason: "Noticeable contrast between casual and formal elements" };
 }
 
 function scoreWeather(items, weather) {
   const fitTable = WEATHER_FABRIC_FIT[weather];
   if (!fitTable) {
-    return { score: 0, reason: null }; // unrecognized/missing weather value — don't guess
+    return { score: 20, reason: null };
   }
 
-  let total = 0;
+  let penalty = 0;
   let worstPenalty = 0;
   for (const item of items) {
-    const penalty = fitTable[item.fabricWeight];
-    if (typeof penalty === "number") {
-      total += penalty;
-      if (penalty < worstPenalty) worstPenalty = penalty;
-    }
+    const itemPenalty = fitTable[item.fabricWeight] || 0;
+    penalty += itemPenalty;
+    if (itemPenalty < worstPenalty) worstPenalty = itemPenalty;
   }
 
+  const score = Math.max(5, 20 + penalty);
   const reason = worstPenalty <= -8 ? `Fabric weight not ideal for ${weather} weather` : null;
-  return { score: total, reason };
+  return { score, reason };
 }
 
 function scoreHistoryPenalty(items, recentWornItemIds) {
   if (!recentWornItemIds || recentWornItemIds.size === 0) {
-    return { score: 0, reason: null };
+    return { score: 5, reason: null };
   }
 
   const hasRecentItem = items.some((item) => recentWornItemIds.has(item._id.toString()));
   if (hasRecentItem) {
     return {
-      score: -8,
-      reason: "Contains items worn in the last 7 days — rating adjusted for variety",
+      score: -5,
+      reason: "Includes items worn in the last 7 days — score adjusted for outfit variety",
     };
   }
 
-  return { score: 0, reason: null };
+  return { score: 5, reason: "Fresh combination (no items worn in the last 7 days)" };
 }
 
 function scoreCombo(combo, weather, recentWornItemIds) {
   const items = Object.values(combo);
 
-  const color = scoreColors(items.map((i) => i.color));
+  const color = scoreColors(items.map((i) => i.color || ""));
   const pattern = scorePatterns(items);
-  const formality = scoreFormality(items.map((i) => i.formality));
+  const formality = scoreFormality(items.map((i) => i.formality || "casual"));
   const weatherResult = scoreWeather(items, weather);
   const historyResult = scoreHistoryPenalty(items, recentWornItemIds);
 
-  const totalScore =
+  const rawScore =
     color.score +
     pattern.score +
     formality.score +
     weatherResult.score +
     historyResult.score;
+
+  // Normalize against the true achievable maximum instead of clamping,
+  // so distinct strong outfits don't all flatten to the same 100%.
+  const normalizedScore = (rawScore / MAX_RAW_SCORE) * 100;
+  const finalScore = Math.max(0, Math.min(100, Math.round(normalizedScore)));
 
   const explanation = [
     color.reason,
@@ -143,7 +156,7 @@ function scoreCombo(combo, weather, recentWornItemIds) {
     historyResult.reason,
   ].filter((r) => r !== null);
 
-  return { score: totalScore, explanation };
+  return { score: finalScore, explanation };
 }
 
 function cartesian(arraysWithLabels) {

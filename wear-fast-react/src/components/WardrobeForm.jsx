@@ -8,7 +8,7 @@ const FITS = ['slim', 'regular', 'loose', 'oversized'];
 const FABRIC_WEIGHTS = ['light', 'medium', 'heavy'];
 const FORMALITIES = ['casual', 'smart-casual', 'formal'];
 
-function WardrobeForm({ onSubmit, initialData }) {
+function WardrobeForm({ onSubmit, onClose, initialData }) {
   const [name, setName] = useState(initialData?.name || '');
   const [category, setCategory] = useState(initialData?.category || CATEGORIES[0]);
   const [color, setColor] = useState(initialData?.color || COLORS[0]);
@@ -33,109 +33,152 @@ function WardrobeForm({ onSubmit, initialData }) {
   function handleSubmit(e) {
     e.preventDefault();
 
-  const item = {
-    ...(initialData?._id && { _id: initialData._id }),
-    name,
-    category,
-    color,
-    pattern,
-    occasion,
-    fit,
-    fabricWeight,
-    formality,
-    image,
-  };
+    const item = {
+      ...(initialData?._id && { _id: initialData._id }),
+      name,
+      category,
+      color,
+      pattern,
+      occasion,
+      fit,
+      fabricWeight,
+      formality,
+      image,
+    };
 
     onSubmit(item);
   }
 
+  const selectClass = "font-display text-sm border border-linen-border rounded-tag px-2 py-1.5 bg-linen text-ink";
+  const labelClass = "flex flex-col gap-1";
+  const labelTextClass = "font-mono-tag text-[10px] text-muted uppercase";
+
   return (
-    <form className="wardrobe-form" onSubmit={handleSubmit}>
-      <label>
-        Name
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-      </label>
-
-      <label>
-        Category
-        <select value={category} onChange={(e) => setCategory(e.target.value)}>
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Color
-        <select value={color} onChange={(e) => setColor(e.target.value)}>
-          {COLORS.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Pattern
-        <select value={pattern} onChange={(e) => setPattern(e.target.value)}>
-          {PATTERNS.map((p) => (
-            <option key={p} value={p}>{p}</option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Occasion
-        <select value={occasion} onChange={(e) => setOccasion(e.target.value)}>
-          {OCCASIONS.map((o) => (
-            <option key={o} value={o}>{o}</option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Fit
-        <select value={fit} onChange={(e) => setFit(e.target.value)}>
-          {FITS.map((f) => (
-            <option key={f} value={f}>{f}</option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Fabric weight
-        <select value={fabricWeight} onChange={(e) => setFabricWeight(e.target.value)}>
-          {FABRIC_WEIGHTS.map((f) => (
-            <option key={f} value={f}>{f}</option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Formality
-        <select value={formality} onChange={(e) => setFormality(e.target.value)}>
-          {FORMALITIES.map((f) => (
-            <option key={f} value={f}>{f}</option>
-          ))}
-        </select>
-      </label>
-
-      <label>
-        Image
-        <input type="file" accept="image/*" onChange={handleImageChange} />
-      </label>
-
-      {image && (
-        <img src={image} alt="preview" className="wardrobe-form__preview" />
-      )}
-
-      <button type="submit">
-        {initialData ? 'Save Changes' : 'Add Item'}
+    <form
+      onSubmit={handleSubmit}
+      className="relative bg-linen-card border border-linen-border rounded-card p-5 max-w-md mx-auto"
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close form"
+        className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-tag text-muted hover:text-brick hover:bg-linen transition-colors"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M18 6 6 18" />
+          <path d="M6 6l12 12" />
+        </svg>
       </button>
+
+      <h3 className="font-display text-lg font-semibold text-ink mb-4">
+        {initialData ? 'Edit Item' : 'Add New Item'}
+      </h3>
+
+      <div className="flex flex-col gap-3">
+        <label className={labelClass}>
+          <span className={labelTextClass}>Name</span>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className={selectClass}
+          />
+        </label>
+
+        <label className={labelClass}>
+          <span className={labelTextClass}>Category</span>
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectClass}>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className={labelClass}>
+          <span className={labelTextClass}>Color</span>
+          <select value={color} onChange={(e) => setColor(e.target.value)} className={selectClass}>
+            {COLORS.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className={labelClass}>
+          <span className={labelTextClass}>Pattern</span>
+          <select value={pattern} onChange={(e) => setPattern(e.target.value)} className={selectClass}>
+            {PATTERNS.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className={labelClass}>
+          <span className={labelTextClass}>Occasion</span>
+          <select value={occasion} onChange={(e) => setOccasion(e.target.value)} className={selectClass}>
+            {OCCASIONS.map((o) => (
+              <option key={o} value={o}>{o}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className={labelClass}>
+          <span className={labelTextClass}>Fit</span>
+          <select value={fit} onChange={(e) => setFit(e.target.value)} className={selectClass}>
+            {FITS.map((f) => (
+              <option key={f} value={f}>{f}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className={labelClass}>
+          <span className={labelTextClass}>Fabric weight</span>
+          <select value={fabricWeight} onChange={(e) => setFabricWeight(e.target.value)} className={selectClass}>
+            {FABRIC_WEIGHTS.map((f) => (
+              <option key={f} value={f}>{f}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className={labelClass}>
+          <span className={labelTextClass}>Formality</span>
+          <select value={formality} onChange={(e) => setFormality(e.target.value)} className={selectClass}>
+            {FORMALITIES.map((f) => (
+              <option key={f} value={f}>{f}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className={labelClass}>
+          <span className={labelTextClass}>Image</span>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="font-display text-sm text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-tag file:border-0 file:bg-denim file:text-linen-card file:text-xs file:uppercase file:tracking-wide file:cursor-pointer"
+          />
+        </label>
+
+        {image && (
+          <img src={image} alt="preview" className="w-32 h-32 object-cover rounded-tag mx-auto" />
+        )}
+
+        <div className="flex gap-2 mt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 font-display text-sm uppercase tracking-wide px-4 py-2 rounded-tag border border-linen-border text-muted hover:border-denim hover:text-denim transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="flex-1 bg-denim hover:bg-denim-light text-linen-card font-display text-sm uppercase tracking-wide px-4 py-2 rounded-tag transition-colors duration-200"
+          >
+            {initialData ? 'Save Changes' : 'Add Item'}
+          </button>
+        </div>
+      </div>
     </form>
   );
 }
