@@ -38,7 +38,7 @@ function Signup() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/auth/signup", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -51,8 +51,6 @@ function Signup() {
         return;
       }
 
-      // Show a brief confirmation before redirecting, so it's clear
-      // the account was actually created rather than just vanishing.
       setSuccess(true);
       setTimeout(() => navigate("/login"), 1500);
     } catch {

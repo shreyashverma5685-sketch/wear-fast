@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 
+const API_URL = `${import.meta.env.VITE_API_URL}/history`;
+
 const CATEGORY_STYLES = {
   "Best Match": { text: "text-denim", bg: "bg-denim" },
   "Safe Neutral": { text: "text-olive", bg: "bg-olive" },
@@ -13,33 +15,40 @@ function OutfitHistory() {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
   const [deletingId, setDeletingId] = useState(null);
+  const [sevenDaysAgo] = useState(() => Date.now() - 7 * 24 * 60 * 60 * 1000);
 
   const token = localStorage.getItem("wf_token");
 
-  const fetchHistory = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/history", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || "Failed to load history");
-      } else {
-        setHistoryList(data);
-      }
-    } catch (err) {
-      console.error("Fetch history failed:", err);
-      setError("Could not connect to the server");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchHistory();
+    let ignore = false;
+
+    async function loadHistory() {
+      try {
+        const res = await fetch(API_URL, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (ignore) return;
+
+        if (!res.ok) {
+          setError(data.message || "Failed to load history");
+        } else {
+          setHistoryList(data);
+        }
+      } catch (err) {
+        if (!ignore) {
+          console.error("Fetch history failed:", err);
+          setError("Could not connect to the server");
+        }
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+
+    loadHistory();
+    return () => {
+      ignore = true;
+    };
   }, [token]);
 
   const handleDeleteEntry = async (id) => {
@@ -47,7 +56,7 @@ function OutfitHistory() {
 
     setDeletingId(id);
     try {
-      const res = await fetch(`http://localhost:5000/history/${id}`, {
+      const res = await fetch(`${API_URL}/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -66,8 +75,6 @@ function OutfitHistory() {
       setDeletingId(null);
     }
   };
-
-  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
   const filteredHistory = historyList.filter((entry) => {
     if (filter === "7days") {

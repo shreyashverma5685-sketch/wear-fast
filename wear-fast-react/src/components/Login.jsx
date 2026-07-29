@@ -9,8 +9,6 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Already logged in? Bounce straight to the wardrobe instead of
-  // showing the login form again.
   useEffect(() => {
     if (localStorage.getItem("wf_token")) {
       navigate("/wardrobe");
@@ -28,7 +26,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/auth/login", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

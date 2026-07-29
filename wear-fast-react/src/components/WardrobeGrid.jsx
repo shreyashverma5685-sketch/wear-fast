@@ -4,7 +4,7 @@ import WardrobeCard from "./WardrobeCard";
 import WardrobeForm from "./WardrobeForm";
 import FilterBar from "./FilterBar";
 
-const API_URL = "http://localhost:5000/items";
+const API_URL = `${import.meta.env.VITE_API_URL}/items`;
 
 function WardrobeGrid() {
   const [items, setItems] = useState([]);
