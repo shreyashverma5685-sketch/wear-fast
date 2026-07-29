@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 96" width="340" height="96">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&amp;family=JetBrains+Mono:wght@600&amp;display=swap');
+      .title-wear {
+        font-family: 'Oswald', 'Arial Black', sans-serif;
+        font-weight: 700;
+        font-size: 38px;
+        fill: #2A241E;
+        letter-spacing: -0.5px;
+      }
+      .title-fast {
+        font-family: 'Oswald', 'Arial Black', sans-serif;
+        font-weight: 700;
+        font-size: 38px;
+        fill: #3C5A72;
+        letter-spacing: -0.5px;
+      }
+      .subtitle {
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+        font-weight: 600;
+        font-size: 13px;
+        fill: #8A8471;
+        letter-spacing: 4.5px;
+      }
+    </style>
+  </defs>
+
+  <!-- Logo Badge Icon -->
+  <g transform="translate(4, 4)">
+    <rect width="88" height="88" rx="22" fill="#3C5A72"/>
+    <path d="M 33 26 C 40 35, 56 35, 63 26 L 79 35 L 71 51 L 63 47 L 63 72 C 63 75.5, 60.5 78, 57 78 L 39 78 C 35.5 78, 33 75.5, 33 72 L 33 47 L 25 51 L 17 35 Z"
+          fill="none"
+          stroke="#F7F2E9"
+          stroke-width="6"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+  </g>
+
+  <!-- Brand Typography -->
+  <text x="108" y="52">
+    <tspan class="title-wear">WEAR </tspan>
+    <tspan class="title-fast">FAST</tspan>
+  </text>
+
+  <!-- Subtitle -->
+  <text x="110" y="74" class="subtitle">SMART WARDROBE</text>
+</svg>
