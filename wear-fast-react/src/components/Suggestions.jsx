@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const CATEGORY_STYLES = {
   "Best Match": { text: "text-denim", bg: "bg-denim", border: "border-denim/30" },
   "Safe Neutral": { text: "text-olive", bg: "bg-olive", border: "border-olive/30" },
@@ -35,7 +37,6 @@ function Suggestions() {
 
   const token = localStorage.getItem("wf_token");
 
-  // Save state changes to sessionStorage for tab persistence (Task B)
   useEffect(() => {
     sessionStorage.setItem("wf_sug_occ", occasion);
     sessionStorage.setItem("wf_sug_weath", weather);
@@ -48,12 +49,11 @@ function Suggestions() {
     sessionStorage.setItem("wf_worn_map", JSON.stringify(wornMap));
   }, [occasion, weather, timeOfDay, suggestions, moreSuggestions, messages, wornMap]);
 
-  // Sync wornMap with active history records on mount so deleted history items reset immediately
   useEffect(() => {
     if (!token) return;
     async function syncWornMapWithHistory() {
       try {
-        const res = await fetch("http://localhost:5000/history", {
+        const res = await fetch(`${API_URL}/history`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -82,7 +82,6 @@ function Suggestions() {
     syncWornMapWithHistory();
   }, [token]);
 
-  // Handle auto-fetching if launched from Home page Quick Generator
   useEffect(() => {
     const quickOcc = sessionStorage.getItem("wf_quick_occ");
     const quickWeath = sessionStorage.getItem("wf_quick_weath");
@@ -97,7 +96,7 @@ function Suggestions() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:5000/suggestions", {
+      const res = await fetch(`${API_URL}/suggestions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -125,7 +124,6 @@ function Suggestions() {
     }
   }
 
-  // Toggle Mark Worn / Undo Worn (Task A)
   async function handleToggleWorn(outfit, category, outfitKey) {
     const isCurrentlyWorn = wornMap[outfitKey];
     const itemIds = Object.values(outfit).map((item) => item._id);
@@ -134,8 +132,7 @@ function Suggestions() {
 
     try {
       if (isCurrentlyWorn) {
-        // Undo: call backend /history/undo endpoint
-        const res = await fetch("http://localhost:5000/history/undo", {
+        const res = await fetch(`${API_URL}/history/undo`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -155,10 +152,7 @@ function Suggestions() {
           alert(data.message || "Failed to undo history entry");
         }
       } else {
-        // Mark worn: call POST /history. category falls back to
-        // "Suggestion" (not "Best Match") since Load More cards pass
-        // category = null and aren't actually Best Match picks.
-        const res = await fetch("http://localhost:5000/history", {
+        const res = await fetch(`${API_URL}/history`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -187,9 +181,6 @@ function Suggestions() {
     fetchSuggestions(occasion, weather, timeOfDay);
   }
 
-  // Score badge now uses the outfit's own category color instead of
-  // deriving a separate color from the score value — keeps the
-  // category-color language (denim/olive/brick) consistent everywhere.
   function getScoreBadge(score, style) {
     return (
       <span className={`font-mono-tag text-xs font-bold px-2.5 py-1 rounded-md ${style.bg} text-linen-card shadow-sm inline-flex items-center gap-1`}>
@@ -257,8 +248,6 @@ function Suggestions() {
           </div>
         )}
 
-        {/* Item row — flex instead of grid so pieces always share one
-            row regardless of count or screen width, never wrapping */}
         <div className="flex gap-3">
           {Object.entries(outfit).map(([slot, item]) => (
             <div key={item._id} className="flex-1 min-w-0 bg-linen border border-linen-border rounded-lg p-2.5 flex flex-col justify-between space-y-2 card-hover">
@@ -307,7 +296,6 @@ function Suggestions() {
         </div>
       </div>
 
-      {/* Generator Form */}
       <form onSubmit={handleSubmit} className="bg-linen-card border border-linen-border rounded-xl p-5 card-shadow">
         <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 items-end">
           <div>
@@ -380,7 +368,6 @@ function Suggestions() {
         </div>
       )}
 
-      {/* Categorized Outfit Cards */}
       {suggestions && suggestions.length > 0 ? (
         <div className="space-y-6">
           {suggestions.map((entry, i) => renderOutfitCard(entry, i, entry.category))}
@@ -401,7 +388,6 @@ function Suggestions() {
         )
       )}
 
-      {/* More Suggestions */}
       {moreSuggestions.length > 0 && (
         <div className="pt-4 border-t border-linen-border">
           <button
