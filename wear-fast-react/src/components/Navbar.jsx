@@ -30,9 +30,9 @@ function Navbar() {
     <header className="sticky top-0 z-50 bg-linen-card/95 backdrop-blur-md border-b border-linen-border card-shadow transition-all">
       <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 flex-wrap gap-3">
         <NavLink to="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-lg bg-denim flex items-center justify-center text-linen-card shadow-sm group-hover:bg-denim-light transition-colors">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.38 3.46 16 2a4 4 0 0 0-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
+          <div className="w-10 h-10 rounded-xl bg-denim flex items-center justify-center text-linen-card shadow-sm group-hover:bg-denim-light transition-colors p-1">
+            <svg width="28" height="28" viewBox="0 0 100 100" fill="none" stroke="#F7F2E9" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M 35 28 C 42 37, 58 37, 65 28 L 81 37 L 73 53 L 65 49 L 65 74 C 65 77.5, 62.5 80, 59 80 L 41 80 C 37.5 80, 35 77.5, 35 74 L 35 49 L 27 53 L 19 37 Z" />
             </svg>
           </div>
           <div className="flex flex-col">
