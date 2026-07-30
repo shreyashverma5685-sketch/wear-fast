@@ -13,7 +13,7 @@ function Home() {
     if (!token) return;
     async function fetchStats() {
       try {
-        const res = await fetch("http://localhost:5000/items", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/items`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
